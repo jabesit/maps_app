@@ -26,29 +26,61 @@ class _SearchBarBody extends StatefulWidget {
 }
 
 class _SearchBarBodyState extends State<_SearchBarBody> {
+  final SearchController _searchController = SearchController();
+
+  @override
+  void initState() {
+    _searchController.addListener(() {
+      print("_searchController: ${_searchController.text}");
+    });
+    super.initState();
+  }
+
+  // these will be reused later
+  final leading = const Icon(Icons.search);
+  final trailing = [
+    IconButton(
+      icon: const Icon(Icons.keyboard_voice),
+      onPressed: () {
+        print('Use voice command');
+      },
+    ),
+    IconButton(
+      icon: const Icon(Icons.camera_alt),
+      onPressed: () {
+        print('Use image search');
+      },
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final String hintCriteria = _searchController.text.isEmpty
+        ? 'Escribir Criterio...'
+        : _searchController.value.text;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SearchAnchor(
+        isFullScreen: false,
+        viewElevation: 100,
+        searchController: _searchController,
+        viewHintText: hintCriteria,
         builder: (BuildContext context, SearchController controller) {
           return SearchBar(
-            controller: controller,
+            controller: _searchController,
             padding: const MaterialStatePropertyAll<EdgeInsets>(
                 EdgeInsets.symmetric(horizontal: 16.0)),
-            leading: const Icon(Icons.search),
             hintText: "Buscar Ubicacion...",
-            trailing: const [
-              Tooltip(
-                message: 'Change brightness mode',
-                child: Icon(Icons.wb_sunny_outlined),
-              )
-            ],
+            leading: leading,
+            trailing: trailing,
             onTap: () {
-              controller.openView();
+              _searchController.openView();
             },
-            onChanged: (_) {
-              controller.openView();
+            onChanged: (String value) {
+              print('value: $value');
+            },
+            onSubmitted: (value) {
+              print("onSubmitted $value");
             },
           );
         },

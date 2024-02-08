@@ -7,7 +7,7 @@ class RouteDestination {
 
   final List<LatLng> points;
   final double duration;
-  final double distance;
+  final String distance;
 
   RouteDestination({
     required this.points, 
