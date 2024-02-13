@@ -3,21 +3,21 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class TrafficResponse {
   List<Features>? features;
 
-  TrafficResponse({this.features});
+  TrafficResponse({features});
 
   TrafficResponse.fromJson(Map<String, dynamic> json) {
     if (json['features'] != null) {
       features = <Features>[];
       json['features'].forEach((v) {
-        features!.add(new Features.fromJson(v));
+        features!.add(Features.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.features != null) {
-      data['features'] = this.features!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (features != null) {
+      data['features'] = features!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -27,23 +27,23 @@ class Features {
   Properties? properties;
   Geometry? geometry;
 
-  Features({this.properties, this.geometry});
+  Features({properties, geometry});
 
   Features.fromJson(Map<String, dynamic> json) {
     properties = json['properties'] != null
-        ? new Properties.fromJson(json['properties'])
+        ? Properties.fromJson(json['properties'])
         : null;
     geometry =
-        json['geometry'] != null ? new Geometry.fromJson(json['geometry']) : null;
+        json['geometry'] != null ? Geometry.fromJson(json['geometry']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.properties != null) {
-      data['properties'] = this.properties!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (properties != null) {
+      data['properties'] = properties!.toJson();
     }
-    if (this.geometry != null) {
-      data['geometry'] = this.geometry!.toJson();
+    if (geometry != null) {
+      data['geometry'] = geometry!.toJson();
     }
     return data;
   }
@@ -55,7 +55,7 @@ class Properties {
   String? distanceUnits;
   double? time;
 
-  Properties({this.units, this.distance, this.distanceUnits, this.time});
+  Properties({units, distance, distanceUnits, time});
 
   Properties.fromJson(Map<String, dynamic> json) {
     units = json['units'];
@@ -65,11 +65,11 @@ class Properties {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['units'] = this.units;
-    data['distance'] = this.distance;
-    data['distance_units'] = this.distanceUnits;
-    data['time'] = this.time;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['units'] = units;
+    data['distance'] = distance;
+    data['distance_units'] = distanceUnits;
+    data['time'] = time;
     return data;
   }
 }
@@ -77,7 +77,7 @@ class Properties {
 class Geometry {
   List<LatLng>? coordinates;
 
-  Geometry({this.coordinates});
+  Geometry({coordinates});
 
   Geometry.fromJson(Map<String, dynamic> json) {
     if (json['coordinates'] != null) {
@@ -89,9 +89,9 @@ class Geometry {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.coordinates != null) {
-      data['coordinates'] = this.coordinates!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (coordinates != null) {
+      data['coordinates'] = coordinates!.map((v) => v.toJson()).toList();
     }
     return data;
   }

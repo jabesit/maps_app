@@ -30,31 +30,21 @@ class _SearchBarBodyState extends State<_SearchBarBody> {
 
   @override
   void initState() {
-    _searchController.addListener(() {
-      print("_searchController: ${_searchController.text}");
-    });
+    _searchController.addListener(_handleFocusChange);
     super.initState();
   }
 
-  // these will be reused later
-  final leading = const Icon(Icons.search);
-  final trailing = [
-    IconButton(
-      icon: const Icon(Icons.keyboard_voice),
-      onPressed: () {
-        print('Use voice command');
-      },
-    ),
-    IconButton(
-      icon: const Icon(Icons.camera_alt),
-      onPressed: () {
-        print('Use image search');
-      },
-    ),
-  ];
+  void _handleFocusChange() {
+    if (_searchController.text.length >= 5) {
+      final searchBloc = BlocProvider.of<SearchBloc>(context);
+      searchBloc.searchByCriteria(_searchController.text);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final searchBloc = BlocProvider.of<SearchBloc>(context);
+
     final String hintCriteria = _searchController.text.isEmpty
         ? 'Escribir Criterio...'
         : _searchController.value.text;
@@ -65,15 +55,45 @@ class _SearchBarBodyState extends State<_SearchBarBody> {
         viewElevation: 100,
         searchController: _searchController,
         viewHintText: hintCriteria,
+        viewLeading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _searchController.clear();
+            Navigator.of(context).pop();
+          },
+          style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        ),
+        viewTrailing: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              _searchController.clear();
+            },
+          ),
+        ],
         builder: (BuildContext context, SearchController controller) {
           return SearchBar(
             controller: _searchController,
             padding: const MaterialStatePropertyAll<EdgeInsets>(
                 EdgeInsets.symmetric(horizontal: 16.0)),
             hintText: "Buscar Ubicacion...",
-            leading: leading,
-            trailing: trailing,
+            leading: const Icon(Icons.search),
+            trailing: [
+              IconButton(
+                icon: const Icon(Icons.keyboard_voice),
+                onPressed: () {
+                  print('Use voice command');
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  print('Use image search');
+                },
+              ),
+            ],
             onTap: () {
+              print('openView');
               _searchController.openView();
             },
             onChanged: (String value) {
@@ -84,38 +104,48 @@ class _SearchBarBodyState extends State<_SearchBarBody> {
             },
           );
         },
-        suggestionsBuilder: (BuildContext context, SearchController controller) {
-          final List<ListTile> list = [];
-
-          list.add(ListTile(
-              title: const Text("choose location"),
-              onTap: () {
-                final searchBloc = BlocProvider.of<SearchBloc>(context);
-                searchBloc.add(OnActivateManualMarkerEvent());
-                controller.closeView("choose location");
-                /*
-                  setState(() {
-                    
+        suggestionsBuilder: (context, controller) {
+          return [
+            BlocBuilder<SearchBloc, SearchState>(builder: (context, state) {
+              if (state is OnResultSuggestionsEvent) {
+                print("OnResultSuggestionsEvent");
+              }
+              if (state is OnErrorSuggestionsEvent) {
+                print("OnErrorSuggestionsEvent");
+              }
+              final list = state.suggestionsList;
+              if (list.isNotEmpty) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: list.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final String item = list[index];
+                    return ListTile(
+                      title: Text(item),
+                      onTap: () {
+                        controller.removeListener(_handleFocusChange);
+                        controller.closeView(item);
+                      },
+                    );
+                  },
+                );
+              }
+              if (state.message.isNotEmpty) {
+                return Text(state.message);
+              }
+              return ListTile(
+                  leading: const Icon(
+                    Icons.location_on_outlined,
+                    color: Colors.black,
+                  ),
+                  title: const Text("choose location"),
+                  onTap: () {
+                    searchBloc.add(OnActivateManualMarkerEvent());
                     controller.closeView("choose location");
-                  });*/
-              }));
-
-          list.addAll(List<ListTile>.generate(5, (int index) {
-            final String item = 'item $index';
-            return ListTile(
-              leading: const Icon(
-                Icons.location_on_outlined,
-                color: Colors.black,
-              ),
-              title: Text(item),
-              onTap: () {
-                setState(() {
-                  controller.closeView(item);
-                });
-              },
-            );
-          }));
-          return list;
+                  });
+            })
+          ];
         },
       ),
     );
