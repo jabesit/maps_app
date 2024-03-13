@@ -11,11 +11,10 @@ import '../../permission_handle.dart';
 import 'package:geolocator_platform_interface/src/enums/location_service.dart'
     as geolocator_enum;
 
-@GenerateMocks([TrafficService])
 void main() {
   late GpsBloc gpsBloc;
 
-  setUp(() {
+  setUpAll(() {
     WidgetsFlutterBinding.ensureInitialized();
     GeolocatorPlatform.instance = MockGeolocatorPlatform();
     PermissionHandlerPlatform.instance = MockPermissionHandlerPlatform();
@@ -35,6 +34,25 @@ void main() {
 
     test('askPermissionGPS', () {
       gpsBloc.askGpsAccess();
+    });
+  });
+
+  group('Testing GPS State', () {
+    test('Gps Events get Props', () {
+      expect(gpsBloc.state.toString(), isNotNull);
+    });
+    test('Check Permission Granted to show Map', () {
+      gpsBloc.emit(const GpsState(isGpsEnabled: true, isGpsPermissionGranted: true));
+      expect(gpsBloc.state.isAllGranted, true);
+    });
+    test('Use Copy with isGpsEnabled', () {
+      gpsBloc.emit(gpsBloc.state.copyWith(isGpsEnabled: false));
+      expect(gpsBloc.state.isGpsEnabled, false);
+      expect(gpsBloc.state.isAllGranted, false);
+    });
+    test('Use Copy with isGpsPermissionGranted', () {
+      gpsBloc.emit(gpsBloc.state.copyWith(isGpsPermissionGranted: false));
+      expect(gpsBloc.state.isAllGranted, false);
     });
   });
 
